@@ -285,8 +285,55 @@ const Index = () => {
     Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
   };
 
+  const handleExport = () => {
+    const exportData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      fundAssumptions,
+      portfolioConstruction,
+      scenarioAnalysis,
+      dealDynamics,
+      comparables,
+      estimatedDilution,
+      metrics,
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fund-model-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target?.result as string);
+        if (imported.fundAssumptions) setFundAssumptions(imported.fundAssumptions);
+        if (imported.portfolioConstruction) setPortfolioConstruction(imported.portfolioConstruction);
+        if (imported.scenarioAnalysis) setScenarioAnalysis(imported.scenarioAnalysis);
+        if (imported.dealDynamics) setDealDynamics(imported.dealDynamics);
+        if (imported.comparables) setComparables(imported.comparables);
+        if (imported.estimatedDilution) setEstimatedDilution(imported.estimatedDilution);
+      } catch (error) {
+        console.error('Failed to import model', error);
+      } finally {
+        event.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleDecisionClick = () => {
-    setActiveTab('decision');
+    setActiveTab('deliverables');
   };
 
   return (
