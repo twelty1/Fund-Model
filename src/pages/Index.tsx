@@ -341,15 +341,42 @@ const Index = () => {
       {/* Header */}
       <header className="border-b border-border bg-card px-4 py-2 flex items-center justify-between shrink-0">
         <h1 className="text-lg font-semibold text-foreground">Fund Model Analyzer</h1>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={resetAll}
-          className="gap-1.5 text-muted-foreground hover:text-foreground"
-        >
-          <RefreshCcw className="w-3.5 h-3.5" />
-          Reset
-        </Button>
+        <div className="flex items-center gap-1">
+          <input
+            type="file"
+            accept="application/json,.json"
+            ref={fileInputRef}
+            onChange={handleImport}
+            className="hidden"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleImportClick}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            Import
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleExport}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={resetAll}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <RefreshCcw className="w-3.5 h-3.5" />
+            Reset
+          </Button>
+        </div>
       </header>
 
       <main className="flex-1 overflow-hidden p-4 pb-0">
