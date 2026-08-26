@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { FundAssumptions, PortfolioConstruction, ScenarioAnalysis, DealDynamics, ExitScenario, ComparableCompany } from '@/types/fundModel';
 import { calculateAllMetrics, calculateTotalFeesFromPeriods, getFirstYearFee } from '@/utils/calculations';
 import { FundAssumptionsForm } from '@/components/FundAssumptionsForm';
@@ -15,7 +15,7 @@ import { FundAllocationChart } from '@/components/FundAllocationChart';
 import { TotalFundAllocationChart } from '@/components/TotalFundAllocationChart';
 import { PortfolioFlowChart } from '@/components/PortfolioFlowChart';
 import { EstimatedDilutionForm, EstimatedDilutionData } from '@/components/EstimatedDilutionForm';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CapTableDeliverables } from '@/components/CapTableDeliverables';
@@ -123,6 +123,7 @@ const Index = () => {
   const [comparables, setComparables] = useState<ComparableCompany[]>(() => loadState(STORAGE_KEYS.comparables, defaultComparables));
   const [estimatedDilution, setEstimatedDilution] = useState<EstimatedDilutionData>(() => loadState(STORAGE_KEYS.dilution, defaultEstimatedDilution));
   const [activeTab, setActiveTab] = useState(() => loadState(STORAGE_KEYS.tab, 'fund'));
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Persist all state to localStorage
   useEffect(() => { saveState(STORAGE_KEYS.fund, fundAssumptions); }, [fundAssumptions]);
@@ -284,8 +285,55 @@ const Index = () => {
     Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
   };
 
+  const handleExport = () => {
+    const exportData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      fundAssumptions,
+      portfolioConstruction,
+      scenarioAnalysis,
+      dealDynamics,
+      comparables,
+      estimatedDilution,
+      metrics,
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fund-model-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target?.result as string);
+        if (imported.fundAssumptions) setFundAssumptions(imported.fundAssumptions);
+        if (imported.portfolioConstruction) setPortfolioConstruction(imported.portfolioConstruction);
+        if (imported.scenarioAnalysis) setScenarioAnalysis(imported.scenarioAnalysis);
+        if (imported.dealDynamics) setDealDynamics(imported.dealDynamics);
+        if (imported.comparables) setComparables(imported.comparables);
+        if (imported.estimatedDilution) setEstimatedDilution(imported.estimatedDilution);
+      } catch (error) {
+        console.error('Failed to import model', error);
+      } finally {
+        event.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleDecisionClick = () => {
-    setActiveTab('decision');
+    setActiveTab('deliverables');
   };
 
   return (
@@ -293,15 +341,42 @@ const Index = () => {
       {/* Header */}
       <header className="border-b border-border bg-card px-4 py-2 flex items-center justify-between shrink-0">
         <h1 className="text-lg font-semibold text-foreground">Fund Model Analyzer</h1>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={resetAll}
-          className="gap-1.5 text-muted-foreground hover:text-foreground"
-        >
-          <RefreshCcw className="w-3.5 h-3.5" />
-          Reset
-        </Button>
+        <div className="flex items-center gap-1">
+          <input
+            type="file"
+            accept="application/json,.json"
+            ref={fileInputRef}
+            onChange={handleImport}
+            className="hidden"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleImportClick}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            Import
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleExport}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={resetAll}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <RefreshCcw className="w-3.5 h-3.5" />
+            Reset
+          </Button>
+        </div>
       </header>
 
       <main className="flex-1 overflow-hidden p-4 pb-0">
