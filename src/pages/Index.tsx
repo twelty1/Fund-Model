@@ -123,6 +123,7 @@ const Index = () => {
   const [comparables, setComparables] = useState<ComparableCompany[]>(() => loadState(STORAGE_KEYS.comparables, defaultComparables));
   const [estimatedDilution, setEstimatedDilution] = useState<EstimatedDilutionData>(() => loadState(STORAGE_KEYS.dilution, defaultEstimatedDilution));
   const [activeTab, setActiveTab] = useState(() => loadState(STORAGE_KEYS.tab, 'fund'));
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Persist all state to localStorage
   useEffect(() => { saveState(STORAGE_KEYS.fund, fundAssumptions); }, [fundAssumptions]);
