@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { FundAssumptions, PortfolioConstruction, ScenarioAnalysis, DealDynamics, ExitScenario, ComparableCompany } from '@/types/fundModel';
 import { calculateAllMetrics, calculateTotalFeesFromPeriods, getFirstYearFee } from '@/utils/calculations';
 import { FundAssumptionsForm } from '@/components/FundAssumptionsForm';
@@ -15,7 +15,7 @@ import { FundAllocationChart } from '@/components/FundAllocationChart';
 import { TotalFundAllocationChart } from '@/components/TotalFundAllocationChart';
 import { PortfolioFlowChart } from '@/components/PortfolioFlowChart';
 import { EstimatedDilutionForm, EstimatedDilutionData } from '@/components/EstimatedDilutionForm';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CapTableDeliverables } from '@/components/CapTableDeliverables';
